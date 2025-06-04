@@ -1,26 +1,47 @@
 <?php
-$businessConfig = [
-  'name' => 'La Esquina Gourmet',
-  'logo' => '🍕',
-  'whatsappNumber' => '5493493123456',
-  'transferAlias' => 'LAESQUINA.GOURMET.MP',
-  'deliveryFee' => 500,
-  'primaryColor' => '#e74c3c',
-  'secondaryColor' => '#c0392b',
-  'categories' => [
-    ['id' => 1, 'name' => 'Pizzas', 'icon' => '🍕'],
-    ['id' => 2, 'name' => 'Hamburguesas', 'icon' => '🍔'],
-    ['id' => 3, 'name' => 'Bebidas', 'icon' => '🥤']
-  ],
-  'products' => [
-    ['id' => 1, 'categoryId' => 1, 'name' => 'Pizza Margherita', 'description' => 'Salsa de tomate, mozzarella, albahaca fresca', 'price' => 3500, 'image' => '🍕'],
-    ['id' => 2, 'categoryId' => 1, 'name' => 'Pizza Pepperoni', 'description' => 'Salsa de tomate, mozzarella, pepperoni', 'price' => 4200, 'image' => '🍕'],
-    ['id' => 3, 'categoryId' => 2, 'name' => 'Hamburguesa Clásica', 'description' => 'Carne, lechuga, tomate, cebolla, queso', 'price' => 3800, 'image' => '🍔'],
-    ['id' => 4, 'categoryId' => 2, 'name' => 'Hamburguesa BBQ', 'description' => 'Carne, cebolla caramelizada, queso, salsa BBQ', 'price' => 4500, 'image' => '🍔'],
-    ['id' => 5, 'categoryId' => 3, 'name' => 'Coca Cola', 'description' => '500ml', 'price' => 800, 'image' => '🥤'],
-    ['id' => 6, 'categoryId' => 3, 'name' => 'Agua Mineral', 'description' => '500ml', 'price' => 600, 'image' => '💧']
-  ]
+require_once __DIR__.'/db.php';
+init_db();
+$db = get_db();
+
+$defaults = [
+    'name' => 'La Esquina Gourmet',
+    'logo' => '🍕',
+    'whatsappNumber' => '5493493123456',
+    'transferAlias' => 'LAESQUINA.GOURMET.MP',
+    'deliveryFee' => '500',
+    'primaryColor' => '#e74c3c',
+    'secondaryColor' => '#c0392b'
 ];
+
+$businessConfig = $defaults;
+$stmt = $db->query("SELECT `key`,`value` FROM settings");
+foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+    $businessConfig[$row['key']] = $row['value'];
+}
+$businessConfig['deliveryFee'] = (int)$businessConfig['deliveryFee'];
+
+$cats = $db->query("SELECT id,name,icon FROM categories ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+if (!$cats) {
+    $cats = [
+        ['id'=>1,'name'=>'Pizzas','icon'=>'🍕'],
+        ['id'=>2,'name'=>'Hamburguesas','icon'=>'🍔'],
+        ['id'=>3,'name'=>'Bebidas','icon'=>'🥤']
+    ];
+}
+$businessConfig['categories'] = $cats;
+
+$prods = $db->query("SELECT id,category_id AS categoryId,name,description,price,image FROM products ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+if (!$prods) {
+    $prods = [
+        ['id'=>1,'categoryId'=>1,'name'=>'Pizza Margherita','description'=>'Salsa de tomate, mozzarella, albahaca fresca','price'=>3500,'image'=>'🍕'],
+        ['id'=>2,'categoryId'=>1,'name'=>'Pizza Pepperoni','description'=>'Salsa de tomate, mozzarella, pepperoni','price'=>4200,'image'=>'🍕'],
+        ['id'=>3,'categoryId'=>2,'name'=>'Hamburguesa Clásica','description'=>'Carne, lechuga, tomate, cebolla, queso','price'=>3800,'image'=>'🍔'],
+        ['id'=>4,'categoryId'=>2,'name'=>'Hamburguesa BBQ','description'=>'Carne, cebolla caramelizada, queso, salsa BBQ','price'=>4500,'image'=>'🍔'],
+        ['id'=>5,'categoryId'=>3,'name'=>'Coca Cola','description'=>'500ml','price'=>800,'image'=>'🥤'],
+        ['id'=>6,'categoryId'=>3,'name'=>'Agua Mineral','description'=>'500ml','price'=>600,'image'=>'💧']
+    ];
+}
+$businessConfig['products'] = $prods;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -78,7 +99,7 @@ $businessConfig = [
 </div>
 
 <!-- Cart Modal -->
-<div id="cartModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center p-4 z-50">
+<div id="cartModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center p-4 z-50" style="display:none;">
   <div class="bg-white rounded-t-lg w-full max-w-md max-h-96 overflow-hidden">
     <div class="p-4 border-b flex justify-between items-center">
       <h3 class="text-lg font-semibold">Tu Pedido</h3>
@@ -96,7 +117,7 @@ $businessConfig = [
 </div>
 
 <!-- Checkout Modal -->
-<div id="checkoutModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+<div id="checkoutModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto" style="display:none;">
   <div class="bg-white rounded-lg w-full max-w-lg my-8">
     <div class="p-4 border-b flex justify-between items-center">
       <h3 class="text-lg font-semibold">Finalizar Pedido</h3>
