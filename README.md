@@ -7,6 +7,8 @@ Run a local server with:
 php -S localhost:8000
 ```
 
+Make sure PHP has the MySQL extension installed (`php-mysql`).
+
 Then open [http://localhost:8000/index.php](http://localhost:8000/index.php) in your browser to test.
 
 The application uses a MySQL database (user and database `u102838416_pdilo`, password `Rovetto5!`).
