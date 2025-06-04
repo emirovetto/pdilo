@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS settings (
+  `key` VARCHAR(50) PRIMARY KEY,
+  `value` TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS categories (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  icon VARCHAR(20) DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  category_id INT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  price INT NOT NULL,
+  image VARCHAR(255) DEFAULT '',
+  FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+);
